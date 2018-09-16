@@ -1,2 +1,10 @@
 tmp*
 tmp/*
+
+# src documents
+metarb.xml
+ruby.istd
+
+*.zip
+node_modules
+.DS_Store
