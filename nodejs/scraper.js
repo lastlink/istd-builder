@@ -122,8 +122,154 @@ async function run() {
     console.log("navigating to:" + element.href)
 
     await page.goto(element.href);
-    await page.waitFor(2 * 1000);
+    // await page.waitForNavigation();
 
+    await page.waitFor(3 * 1000);
+
+    if(i==0)
+      continue;
+    if (MAINCONFIG.course.contentSelector) {
+      console.log("clicking course btn")
+
+      await page.click(MAINCONFIG.course.contentSelector);
+      await page.waitFor(2 * 1000);
+
+      // await page.waitForNavigation();
+    }
+    if (MAINCONFIG.course.tobSelector) {
+      console.log("clicking tob btn")
+
+      await page.click(MAINCONFIG.course.tobSelector);
+      await page.waitFor(2 * 1000);
+
+      // await page.waitForNavigation();
+    }
+    
+    // div.d2l-datalist-container.d2l-datalist-style1 > ul> li > 
+    // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
+    if (MAINCONFIG.course.tobCSelector) {
+      // generate assignments list
+      var assign = document.querySelectorAll("div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem")
+
+      var priorities = [
+        {
+          keywords: ['exam', "report", "project"],
+          priority: 3
+        },
+        {
+          keywords: ['quiz', "due"],
+          priority: 2
+        }
+      ]
+      var defaultPriority = 2;
+      var removeWords = ["I'm Done"]
+      var cutOff = "Due"
+      var currentDate = new Date;
+      var lastDate;
+      var firstDate = new Date(1970, 01, 12);
+      var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+
+
+
+      for (let k = 0; k < assign.length; k++) {
+        const element = assign[k];
+        // console.log(element.innerText);
+        var fulltext = element.innerText
+        removeWords.forEach(word => {
+          fulltext = fulltext.replace(word, "")
+
+        });
+        // var indexOfStevie = myArray.findIndex(i => i.hello === "stevie");
+        console.log(fulltext)
+        var notes = ""
+        var finalTxt = fulltext;
+        var due_date;
+        var notification;
+        var monthNames = ["January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"];
+        if (fulltext.indexOf(cutOff) != -1) {
+          finalTxt = fulltext.substr(0, fulltext.indexOf(cutOff))
+          notes += fulltext.substr(fulltext.indexOf(cutOff), fulltext.length)
+          //  due_date;
+          // currentDate.getFullYear()
+          // var result = "On ";
+          // t = fulltext;
+          // var sub = t.substr(0, 17);
+          // t = t.substr(17);
+          // result += sub + "at ";
+
+          // retrieve time
+          //   var pre = t.substr(0, 2);
+          //   t = t.substr(2, 3);
+          //   var suffix = "am";
+          //   if (parseInt(pre) > 11) {
+          //     suffix = "pm";
+          //     if (pre != 12) {
+          //       pre = parseInt(pre) - 12;
+          //     }
+          //   }
+          //   result += pre + t + suffix;
+          // }
+          // retrieve date
+          var monthIndex = -1;
+          var monthNum = -1;
+          var monthName = ""
+          // monthIndex=monthNames.indexOf()
+          for (let j = 0; j < monthNames.length; j++) {
+            const element = monthNames[j];
+            monthIndex = fulltext.indexOf(element)
+            monthName = element;
+            monthNum = monthNames.indexOf(element) + 1
+            if (monthIndex != -1)
+              break
+
+          }
+          // monthNames.forEach(month => {
+          //   monthIndex = fulltext.indexOf(month)
+          //   monthNum=monthNames.indexOf(month)+1
+          //   if(monthIndex!=-1)
+          //     throw
+          // });
+
+          if (monthIndex != -1 && fulltext.indexOf("at") != -1) {
+
+            var atIndex = fulltext.substr(monthName.length + monthIndex, fulltext.indexOf("at") - (fulltext.length - fulltext.indexOf("at")));
+            parseInt(atIndex)
+
+          }
+          // if(monthIndex!=-1)
+          // monthIndex++;
+
+          var secondDate = new Date(MAINCONFIG.course.defaultYear || currentDate.getFullYear(), 03, monthNum);
+
+
+
+
+          // var finalTxt = fulltext.indexOf(cutOff) == -1 ? fulltext : fulltext.substr(0, fulltext.indexOf(cutOff))
+          console.log("finalTxt:" + finalTxt)
+
+          try {
+            var href = element.querySelector("div > div > div > div > a").href
+            console.log(href)
+            notes += "\n" + href
+          } catch (error) {
+            // console.log(error)
+          }
+          console.log("Notes:" + notes)
+          if (k == 25)
+            break;
+        }
+      } // end assignments 4 loop
+
+      // will need to go to table of contents, 
+      // get all assignments, assign priority, gives notes and due date
+      // then by name find quizzes & assignments and get direct href
+      // exiting on 2nd element
+      if (i == 1) {
+        break;
+      }
+    }
+    // exit();
     // await page.waitForNavigation();
 
   }
