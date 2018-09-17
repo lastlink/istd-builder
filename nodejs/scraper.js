@@ -50,9 +50,6 @@ async function run() {
   await page.waitFor(2 * 1000);
   console.log("finished logging in")
   // get courses list urls
-  // MAINCONFIG.courseList.coursesSelector
-
-  // var courseList = []
   // insert into course list as
   // {
   //   name: "",
@@ -63,57 +60,42 @@ async function run() {
   await page.waitFor(MAINCONFIG.courseList.coursesSelector);
   var courseList = await page.evaluate((courseListConfig) => {
     var tmpList = [];
-    // return courseListConfig.coursesSelector;
     const courses = Array.from(document.querySelectorAll(courseListConfig.coursesSelector));
-    // return courses.length;
-    return courses[0].innerHTML;
-    tmpList.push({
-      name: "",
-      href: "",
-      assignments: []
-    })
-    // for (let i = 0; i < courses.length; i++) {
-    var tmpRow = ""
-    tmpRow = courses.forEach(row => {
-      return row.innerHTML;
-      // return row.innerHTML;
+
+    for (let i = 0; i < courses.length; i++) {
+      const row = courses[i];
       try {
-        var cText = row.querySelector(courseListConfig.courseNameSelector);
-        // console.log(cText)
-        course.name = cText;
+        
 
         var course = {
 
           assignments: []
         }
-        // const row = data[i];
-        // console.log(element.innerText)
-        // console.log(i)
-        // console.log(row.querySelectorAll("div"))
+
+        var cText = row.querySelector(courseListConfig.courseNameSelector).innerText;
+        course.name = cText;
         var href = ""
         if (courseListConfig.courseHrefFunction) {
           href = eval('row' + courseListConfig.courseHrefFunction);
-
-          // console.log(href.substr(MAINCONFIG.courseList.hrefStartString.length, href.indexOf(MAINCONFIG.courseList.hrefEndString) - MAINCONFIG.courseList.hrefStartString.length))
+          href= href.substr(courseListConfig.hrefStartString.length, href.indexOf(courseListConfig.hrefEndString) - courseListConfig.hrefStartString.length)
 
         }
-        // var href = element.querySelector("div > div:nth-child(2)").getAttribute('onclick')
-        // console.log(href)
         course.href = href;
-        // data[0].querySelector("div > div:nth-child(2)").getAttribute('onclick')
 
-        return course;
-        // console.log(element.querySelector("div:nth-child(2) > div:nth-child(1)").innerText)
         tmpList.push(course)
       }
       catch (error) {
         console.log("failed to retrieve input value")
-
         console.log(error)
-        return error;
+        tmpList.push(error.toString())
       }
-    })
-    return tmpRow
+    }
+    // tmpList.push({
+    //   name: "",
+    //   href: "",
+    //   assignments: []
+    // }) 
+   
     return tmpList;
   }, MAINCONFIG.courseList)
   // iterate over each course
