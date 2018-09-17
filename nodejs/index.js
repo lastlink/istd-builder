@@ -1,7 +1,6 @@
-// copy ruby/main.db to tmp/main.db
 const fs = require('fs-extra')
 var unzip = require("unzip");
-
+// copy ruby/main.db to tmp/main.db
 fs.copy('../ruby.istd', './tmp/ruby.zip')
 	.then(() => {
 		console.log('success!');
@@ -15,24 +14,25 @@ fs.copy('../ruby.istd', './tmp/ruby.zip')
 				if (fileName === "main.db") {
 					console.log("main db copied")
 
-					entry.pipe(fs.createWriteStream('./tmp/'+fileName));
+					entry.pipe(fs.createWriteStream('./tmp/' + fileName))
+
 				} else {
 					entry.autodrain();
 				}
 			})
+			.on('close', function () {
+				console.log('file downloaded to ', '/tmp/imageresize/');
+				console.log("finished")
+				// const sequelize = new Sequelize('sqlit://tmp/main.db');
+				// const db = require("./models/index.js")
+				var db = require("./models");
+				// read .csv and add new entries for assignments
+				// console.log(db.assigments)
+				db.assignments.findAll({ limit: 2 }).then(users => {
+					  console.log(users)
+				})
+			});
 
 	})
-	.catch(err => console.error(err))
-	.then(() => {
-		console.log("finished")
-	})
+	.catch(err => console.error(err));
 
-
-
-
-
-// fs.copy('../ruby/main.db', './tmp/main.db')
-//   .then(() => console.log('success!'))
-//   .catch(err => console.error(err))
-
-// read .csv and add new entries for assignments
