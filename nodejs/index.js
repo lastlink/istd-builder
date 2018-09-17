@@ -2,14 +2,14 @@ const fs = require('fs-extra')
 const unzip = require("unzip");
 const csv = require('csv-parser');
 const archiver = require('archiver');
+const MAINCONFIG = require('./config/mainconfig.js');
 
-
-// copy ruby/main.db to tmp/main.db
-fs.copy('../ruby.istd', './tmp/tmp.istd')
+// get most recent date from input
+fs.copy('./input/' + MAINCONFIG.istdSettings.inputFile + '.istd', './tmp/tmp.zip')
 	.then(() => {
 		console.log('success!');
 
-		fs.createReadStream('./tmp/tmp.istd')
+		fs.createReadStream('./tmp/tmp.zip')
 			.pipe(unzip.Parse())
 			.on('entry', function (entry) {
 				var fileName = entry.path;
@@ -44,12 +44,13 @@ fs.copy('../ruby.istd', './tmp/tmp.istd')
 
 							//perform the operation
 							db.sequelize.transaction(function (t) {
-
+								// search for course by name, if it doesn't exist then creat it.
 								return db.assignments.create({
 									is_new: 1,
 									is_local: 1,
 									notes: data.notes,
-									course_uid: 30142136452,
+									due_date: MAINCONFIG.istdSettings.defaultDueDate,
+									course_uid: MAINCONFIG.istdSettings.def_course_uid,
 									name: data.name
 								}, { transaction: t }).then(function (newRow) {
 									// return newRow.setShooter({
