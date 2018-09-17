@@ -30,6 +30,7 @@
 
 * Haven't figured out the datestamp calculation for assignments. From what I can tell the days are a count of days from the start date of the project and the timestamps represent something else. E.g.
   * Time does appear to be a reprensative of minutes in military time. So just divide notification_time by 60 to get minutes.
+  * due_date seems to be a count of days from `1/1/70`
 
 | due_date | notification_time | name                    |
 |----------|-------------------|-------------------------|
