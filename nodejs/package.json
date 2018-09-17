@@ -13,7 +13,11 @@
   },
   "keywords": [
     "nodejs",
-    "sequelizejs"
+    "sequelizejs",
+    "bulkinsert",
+    "sqlite",
+    "istd",
+    "istudiez"
   ],
   "author": "lastlink",
   "license": "MIT",
