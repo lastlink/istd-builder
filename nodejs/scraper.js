@@ -1,6 +1,20 @@
 // a file to scrape a faculty courses assignments into a csv file
 const puppeteer = require('puppeteer');
 const MAINCONFIG = require('./config/mainconfig.js');
+var startTime, endTime;
+startTime = new Date();
+/** return time elapsed */
+function end() {
+  endTime = new Date();
+  var timeDiff = endTime - startTime; //in ms
+  // strip the ms
+  timeDiff /= 1000;
+
+  // get seconds 
+  var seconds = Math.round(timeDiff);
+  // console.log(seconds + " seconds");
+  return "-" + seconds + " seconds";
+}
 
 async function run() {
   const browser = await puppeteer.launch({
@@ -24,7 +38,7 @@ async function run() {
   // const SIGNIN_NEXT = '#idSIButton9';
   // const PASSWORD_SELECTOR = '#i0118';
   // const NO_BTN = "#idBtn_Back";
-  console.log("logging into course website")
+  console.log("logging into course website" + end())
   // steps to click signin before login page
   // IF NOT NULL
   // await page.click(initialNavigation.SIGNIN_BTN);
@@ -48,7 +62,7 @@ async function run() {
   await page.waitForNavigation();
 
   await page.waitFor(2 * 1000);
-  console.log("finished logging in")
+  console.log("finished logging in" + end())
   // get courses list urls
   // insert into course list as
   // {
@@ -65,7 +79,7 @@ async function run() {
     for (let i = 0; i < courses.length; i++) {
       const row = courses[i];
       try {
-        
+
 
         var course = {
 
@@ -77,7 +91,7 @@ async function run() {
         var href = ""
         if (courseListConfig.courseHrefFunction) {
           href = eval('row' + courseListConfig.courseHrefFunction);
-          href= href.substr(courseListConfig.hrefStartString.length, href.indexOf(courseListConfig.hrefEndString) - courseListConfig.hrefStartString.length)
+          href = href.substr(courseListConfig.hrefStartString.length, href.indexOf(courseListConfig.hrefEndString) - courseListConfig.hrefStartString.length)
 
         }
         course.href = href;
@@ -95,13 +109,28 @@ async function run() {
     //   href: "",
     //   assignments: []
     // }) 
-   
+
     return tmpList;
   }, MAINCONFIG.courseList)
   // iterate over each course
-  console.log("finished course parsing")
+  console.log("finished course parsing" + end())
   console.log(courseList);
+  for (let i = 0; i < courseList.length; i++) {
+    const element = courseList[i];
+
+    console.log("navigating to:" + element.name)
+    console.log("navigating to:" + element.href)
+
+    await page.goto(element.href);
+    await page.waitFor(2 * 1000);
+
+    // await page.waitForNavigation();
+
+  }
+  console.log("finished course traversal" + end())
+
   exit();
+
 
   // export final results to input/assignments_template
 
