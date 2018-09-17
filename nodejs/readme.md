@@ -28,4 +28,12 @@
 
 ## Issues
 
-* Haven't figured out the datestamp calculation for assignments.
+* Haven't figured out the datestamp calculation for assignments. From what I can tell the days are a count of days from the start date of the project and the timestamps represent something else. E.g.
+  * Time does appear to be a reprensative of minutes in military time. So just divide notification_time by 60 to get minutes.
+
+| due_date | notification_time | name                    |
+|----------|-------------------|-------------------------|
+| 17821    | 54060             |  test 10/17/2018,3:01pm |
+| 17792    | 50460             | test 9/18/2018 2:01pm   |
+| 17791    | 46860             | test 9/17/2018 1:01pm   |
+| 17790    | 46800             | test 9/16/2018 1pm      |
