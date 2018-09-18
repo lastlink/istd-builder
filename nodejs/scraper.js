@@ -116,12 +116,12 @@ async function run() {
   console.log("finished course parsing" + end())
   console.log(courseList);
   for (let i = 0; i < courseList.length; i++) {
-    const element = courseList[i];
+    const course = courseList[i];
 
-    console.log("navigating to:" + element.name)
-    console.log("navigating to:" + element.href)
+    console.log("navigating to:" + course.name)
+    console.log("navigating to:" + course.href)
 
-    await page.goto(element.href);
+    await page.goto(course.href);
     // await page.waitForNavigation();
 
     await page.waitFor(3 * 1000);
@@ -169,9 +169,15 @@ async function run() {
       var firstDate = new Date(1970, 01, 12);
       var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
 
-
-
+      var assignmentHeader = ["priority", "due_date", "notes", "course_uid", "notify	total_points", "name"]
+      var assignmentList = []
       for (let k = 0; k < assign.length; k++) {
+        var assignment = []
+        var diffDays=""
+        var notes = ""
+        var notification_time = "";
+
+
         const element = assign[k];
         // console.log(element.innerText);
         var fulltext = element.innerText
@@ -180,8 +186,28 @@ async function run() {
 
         });
         // var indexOfStevie = myArray.findIndex(i => i.hello === "stevie");
+
+        var priority = defaultPriority;
+        var priorityObj = -1;
+
+        for (let p = 0; p < priorities.length; p++) {
+          for (let k = 0; k < priorities[p].keywords.length; k++) {
+            const keyword = priorities[p].keywords[k];
+            if (fulltext.indexOf(keyword) != -1) {
+
+              priority = priorities[p].priority
+              break;
+            }
+          }
+          if (priorityObj != -1)
+            break;
+
+        }
+        console.log(priorityObj)
+        // var indexOfPriority = priorities.findIndex(i => { 
+        //   i.keywords.indexOf(fulltext)
+        // );
         console.log(fulltext)
-        var notes = ""
         var finalTxt = fulltext;
         var due_date;
         var notification;
@@ -200,7 +226,7 @@ async function run() {
             const element = monthNames[j];
             monthIndex = notes.indexOf(element)
             if (monthIndex != -1) {
-              monthNum = monthNames.indexOf(element) 
+              monthNum = monthNames.indexOf(element)
               monthName = element;
               break
             }
@@ -210,7 +236,7 @@ async function run() {
           console.log(monthNum)
 
           console.log(monthName)
-          
+
           var monthDay = -1;
           var hours = 0;
           var minutes = 0;
@@ -255,7 +281,7 @@ async function run() {
 
 
           }
-          console.log("monthday:"+monthDay)
+          console.log("monthday:" + monthDay)
 
 
           // if(monthIndex!=-1)
@@ -269,11 +295,10 @@ async function run() {
 
           console.log(secondDate)
 
-          var diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / (oneDay)));
+          diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / (oneDay)));
           // var d = new Date(year, month, day, hours, minutes, seconds, milliseconds);
 
           console.log(diffDays)
-          var notification_time = "";
           if (hours != 0 || minutes != 0)
             notification_time = secondDate.getHours() * 60 * 60 + secondDate.getMinutes() * 60
           console.log(notification_time)
@@ -292,9 +317,21 @@ async function run() {
             // console.log(error)
           }
           console.log("Notes:" + notes)
-          if (k == 5)
+          if (k == 25)
             break;
+        } else {
+          // may be a reading a ssignment set priorty to 1
+          priority = 1;
+
         }
+        console.log("prioty" + priority)
+        assignment.push(priority);
+        assignment.push(diffDays);
+        assignment.push(notes)
+        // assignment.push(course.name)
+        assignment.push(notification_time)
+        assignment.push(finalTxt)
+        console.log(assignment)
       } // end assignments 4 loop
 
       // will need to go to table of contents, 
