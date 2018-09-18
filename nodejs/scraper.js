@@ -126,7 +126,7 @@ async function run() {
 
     await page.waitFor(3 * 1000);
 
-    if(i==0)
+    if (i == 0)
       continue;
     if (MAINCONFIG.course.contentSelector) {
       console.log("clicking course btn")
@@ -144,7 +144,7 @@ async function run() {
 
       // await page.waitForNavigation();
     }
-    
+
     // div.d2l-datalist-container.d2l-datalist-style1 > ul> li > 
     // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
     if (MAINCONFIG.course.tobCSelector) {
@@ -190,26 +190,7 @@ async function run() {
         if (fulltext.indexOf(cutOff) != -1) {
           finalTxt = fulltext.substr(0, fulltext.indexOf(cutOff))
           notes += fulltext.substr(fulltext.indexOf(cutOff), fulltext.length)
-          //  due_date;
-          // currentDate.getFullYear()
-          // var result = "On ";
-          // t = fulltext;
-          // var sub = t.substr(0, 17);
-          // t = t.substr(17);
-          // result += sub + "at ";
 
-          // retrieve time
-          //   var pre = t.substr(0, 2);
-          //   t = t.substr(2, 3);
-          //   var suffix = "am";
-          //   if (parseInt(pre) > 11) {
-          //     suffix = "pm";
-          //     if (pre != 12) {
-          //       pre = parseInt(pre) - 12;
-          //     }
-          //   }
-          //   result += pre + t + suffix;
-          // }
           // retrieve date
           var monthIndex = -1;
           var monthNum = -1;
@@ -217,32 +198,87 @@ async function run() {
           // monthIndex=monthNames.indexOf()
           for (let j = 0; j < monthNames.length; j++) {
             const element = monthNames[j];
-            monthIndex = fulltext.indexOf(element)
-            monthName = element;
-            monthNum = monthNames.indexOf(element) + 1
-            if (monthIndex != -1)
+            monthIndex = notes.indexOf(element)
+            if (monthIndex != -1) {
+              monthNum = monthNames.indexOf(element) 
+              monthName = element;
               break
+            }
 
           }
-          // monthNames.forEach(month => {
-          //   monthIndex = fulltext.indexOf(month)
-          //   monthNum=monthNames.indexOf(month)+1
-          //   if(monthIndex!=-1)
-          //     throw
-          // });
+          // console.log(monthIndex)
+          console.log(monthNum)
 
-          if (monthIndex != -1 && fulltext.indexOf("at") != -1) {
+          console.log(monthName)
+          
+          var monthDay = -1;
+          var hours = 0;
+          var minutes = 0;
+          if (monthIndex != -1 && notes.indexOf("at") != -1) {
+            // console.log(fulltext)
+            // console.log(monthName.length + monthIndex)
+            // console.log(fulltext.indexOf(monthName))
 
-            var atIndex = fulltext.substr(monthName.length + monthIndex, fulltext.indexOf("at") - (fulltext.length - fulltext.indexOf("at")));
-            parseInt(atIndex)
+            // console.log(monthIndex)
+            // console.log(fulltext.indexOf("at"))
+            // console.log(fulltext.indexOf("at") - (monthName.length + monthIndex))
+            monthDay = notes.substr(monthName.length + monthIndex, notes.indexOf("at") - (monthName.length + monthIndex));
+            // console.log(parseInt(atIndex))
+
+            // retrieve time
+            var hourIndex = notes.indexOf("at") + "at".length
+            var minutIndex = notes.indexOf(":") + ":".length
+
+            var prefixIndex = notes.indexOf("PM")
+            var hourOffset = 0;
+            if (prefixIndex != -1) {
+              hourOffset = 12
+            } else
+              prefixIndex = notes.indexOf("AM")
+
+            console.log(hourIndex + ":" + minutIndex + ":" + prefixIndex)
+
+
+            if (hourIndex != -1 & minutIndex != -1 & prefixIndex != -1) {
+              // console.log( minutIndex - (fulltext.length - minutIndex))
+              hours = notes.substr(hourIndex, minutIndex - hourIndex - 1)
+              hours = isNaN(parseInt(hours)) ? 0 : parseInt(hours) + hourOffset
+              console.log("hr:" + hours)
+              minutes = notes.substr(minutIndex, prefixIndex - minutIndex - 1)
+              minutes = isNaN(parseInt(minutes)) ? 0 : parseInt(minutes)
+
+              // console.log( prefixIndex - (fulltext.length - prefixIndex))
+
+              console.log("minutes:" + minutes)
+            }
+
+
 
           }
+          console.log("monthday:"+monthDay)
+
+
           // if(monthIndex!=-1)
           // monthIndex++;
+          var secondDate = new Date();
+          if (monthDay != -1 && monthNum != -1) {
+            secondDate = new Date(MAINCONFIG.course.defaultYear || currentDate.getFullYear(), monthNum, monthDay, hours, minutes);
+          }
+          // var date  = new Date(2018,11,3,05,30)
 
-          var secondDate = new Date(MAINCONFIG.course.defaultYear || currentDate.getFullYear(), 03, monthNum);
 
+          console.log(secondDate)
 
+          var diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / (oneDay)));
+          // var d = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+
+          console.log(diffDays)
+          var notification_time = "";
+          if (hours != 0 || minutes != 0)
+            notification_time = secondDate.getHours() * 60 * 60 + secondDate.getMinutes() * 60
+          console.log(notification_time)
+          // console.log("
+          // days":)
 
 
           // var finalTxt = fulltext.indexOf(cutOff) == -1 ? fulltext : fulltext.substr(0, fulltext.indexOf(cutOff))
@@ -256,7 +292,7 @@ async function run() {
             // console.log(error)
           }
           console.log("Notes:" + notes)
-          if (k == 25)
+          if (k == 5)
             break;
         }
       } // end assignments 4 loop
