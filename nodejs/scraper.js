@@ -129,8 +129,8 @@ async function run() {
 
     await page.waitFor(3 * 1000);
 
-    if (i == 0)
-      continue;
+    // if (i == 0)
+    //   continue;
     if (MAINCONFIG.course.contentSelector) {
       console.log("clicking course btn")
 
@@ -151,13 +151,25 @@ async function run() {
     // div.d2l-datalist-container.d2l-datalist-style1 > ul> li > 
     // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
     if (MAINCONFIG.course.tobCSelector) {
-      MAINCONFIG.course.courseName=course.name
+      MAINCONFIG.course.courseName = course.name
       // generate assignments list
-      await page.waitFor(MAINCONFIG.course.assignmentSelector);
+      try {
+        await page.waitFor(MAINCONFIG.course.assignmentSelector);
+      } catch (error) {
+        console.log("Most likely no assignments on page")
+        console.log(error)
+        continue;
+      }
       var assignmentList = await page.evaluate((courseConfig) => {
 
         var assignList = []
-        var assign = document.querySelectorAll("div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem")
+        var assign = null;
+        assign = document.querySelectorAll(courseConfig.assignmentSelector)
+
+        // go to next course iteration in for loop
+        // if (assign == null)
+        //   continue
+
 
         var priorities = [
           {
@@ -335,7 +347,7 @@ async function run() {
           assignment.push(priority);
           assignment.push(diffDays);
           assignment.push(notes)
-          
+
           assignment.push(courseConfig.courseName)
           assignment.push(notification_time)
           assignment.push(finalTxt)
@@ -347,16 +359,16 @@ async function run() {
 
       console.log("assignment list")
       // console.log(assignmentList)
-      courseList[i]=assignmentList
+      courseList[i] = assignmentList
       fullassignmentList = fullassignmentList.concat(assignmentList);
 
       // will need to go to table of contents, 
       // get all assignments, assign priority, gives notes and due date
       // then by name find quizzes & assignments and get direct href
       // exiting on 2nd element
-      if (i == 1) {
-        break;
-      }
+      // if (i == 1) {
+      //   break;
+      // }
     } // end table of contents selector
     // await page.waitForNavigation();
 
