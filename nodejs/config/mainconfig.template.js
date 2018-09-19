@@ -21,7 +21,7 @@ module.exports = {
 	},
 	courseList : {
 		coursesSelector: "#courses > div:nth-child(1) > div:nth-child(2) > div",
-		courseNameSelector: "div:nth-child(2) > div:nth-child(1)",
+		courseNameSelector: `div:nth-child(2)[id*="info"] > div:nth-child(1)`,
 		// courseLinkSelector: "",
 		courseHrefFunction: `.querySelector("div > div:nth-child(2)").getAttribute('onclick')`,
 		hrefStartString: "location.href='",
