@@ -26,7 +26,6 @@ async function run() {
 
   const page = await browser.newPage();
 
-  // await page.goto('https://github.com');
   // await page.screenshot({ path: 'screenshots/github.png' });
 
   await page.goto(MAINCONFIG.urlList.login);
@@ -152,6 +151,7 @@ async function run() {
     // div.d2l-datalist-container.d2l-datalist-style1 > ul> li > 
     // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
     if (MAINCONFIG.course.tobCSelector) {
+      MAINCONFIG.course.courseName=course.name
       // generate assignments list
       await page.waitFor(MAINCONFIG.course.assignmentSelector);
       var assignmentList = await page.evaluate((courseConfig) => {
@@ -335,7 +335,8 @@ async function run() {
           assignment.push(priority);
           assignment.push(diffDays);
           assignment.push(notes)
-          // assignment.push(course.name)
+          
+          assignment.push(courseConfig.courseName)
           assignment.push(notification_time)
           assignment.push(finalTxt)
           console.log(assignment)
@@ -346,7 +347,7 @@ async function run() {
 
       console.log("assignment list")
       // console.log(assignmentList)
-      
+      courseList[i]=assignmentList
       fullassignmentList = fullassignmentList.concat(assignmentList);
 
       // will need to go to table of contents, 
@@ -360,6 +361,7 @@ async function run() {
     // await page.waitForNavigation();
 
   } // end courselist for loop
+  // console.log(courseList)
   var stringify = require('csv-stringify');
   var fs = require('fs');
 
