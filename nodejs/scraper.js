@@ -115,6 +115,8 @@ async function run() {
   // iterate over each course
   console.log("finished course parsing" + end())
   console.log(courseList);
+  var assignmentHeader = ["priority", "due_date", "notes", "course_name", "notify", "name"]
+  var fullassignmentList = [];
   for (let i = 0; i < courseList.length; i++) {
     const course = courseList[i];
 
@@ -149,7 +151,6 @@ async function run() {
     // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
     if (MAINCONFIG.course.tobCSelector) {
       // generate assignments list
-      var assignmentHeader = ["priority", "due_date", "notes", "course_name", "notify", "name"]
       await page.waitFor(MAINCONFIG.course.assignmentSelector);
       var assignmentList = await page.evaluate((courseConfig) => {
 
@@ -321,8 +322,8 @@ async function run() {
               // console.log(error)
             }
             // console.log("Notes:" + notes)
-            if (k == 25)
-              break;
+            // if (k == 25)
+            //   break;
           } else {
             // may be a reading a ssignment set priorty to 1
             priority = 1;
@@ -342,7 +343,10 @@ async function run() {
       }, MAINCONFIG.course);
 
       console.log("assignment list")
-      console.log(assignmentList)
+      // console.log(assignmentList)
+      
+      fullassignmentList = fullassignmentList.concat(assignmentList);
+
       // will need to go to table of contents, 
       // get all assignments, assign priority, gives notes and due date
       // then by name find quizzes & assignments and get direct href
@@ -350,12 +354,23 @@ async function run() {
       if (i == 1) {
         break;
       }
-    }
+    } // end table of contents selector
     // exit();
     // await page.waitForNavigation();
 
-  }
+  } // end courselist for loop
+  var stringify = require('csv-stringify');
+  var fs = require('fs');
+
+
   console.log("finished course traversal" + end())
+  stringify(fullassignmentList, { header: true, columns: assignmentHeader }, (err, output) => {
+    if (err) throw err;
+    fs.writeFile('./input/assignments_scraped.csv', output, (err) => {
+      if (err) throw err;
+      console.log('assignments_scraped.csv saved.');
+    });
+  });
 
   exit();
 
