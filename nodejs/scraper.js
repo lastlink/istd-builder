@@ -1,6 +1,8 @@
 // a file to scrape a faculty courses assignments into a csv file
 const puppeteer = require('puppeteer');
 const MAINCONFIG = require('./config/mainconfig.js');
+const CREDS = require('./config/creds.js');
+
 var startTime, endTime;
 startTime = new Date();
 /** return time elapsed */
@@ -45,11 +47,11 @@ async function run() {
   // await page.waitForNavigation();
 
   await page.focus(initialNavigation.USERNAME_SELECTOR)
-  await page.keyboard.type(MAINCONFIG.username)
+  await page.keyboard.type(CREDS.username)
   // IF NOT NULL
   // await page.click(initialNavigation.SIGNIN_NEXT); // some sites have a next btn
   await page.focus(initialNavigation.PASSWORD_SELECTOR);
-  await page.keyboard.type(MAINCONFIG.password);
+  await page.keyboard.type(CREDS.password);
 
   await page.waitFor(2000);
   await page.click(initialNavigation.BUTTON_SELECTOR);
@@ -355,7 +357,6 @@ async function run() {
         break;
       }
     } // end table of contents selector
-    // exit();
     // await page.waitForNavigation();
 
   } // end courselist for loop
