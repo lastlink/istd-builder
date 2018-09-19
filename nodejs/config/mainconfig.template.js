@@ -25,7 +25,8 @@ module.exports = {
 		// courseLinkSelector: "",
 		courseHrefFunction: `.querySelector("div > div:nth-child(2)").getAttribute('onclick')`,
 		hrefStartString: "location.href='",
-		hrefEndString: "';"
+		hrefEndString: "';",
+		skipCourses : ["BIO"]
 	},
 	course: {
 		defaultYear: 2018,
