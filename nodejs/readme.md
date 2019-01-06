@@ -7,6 +7,9 @@
 ## technologies used
 
 * nodejs > v8
+* puppeteer
+* sqlite
+* csv
 
 ## reverse engineer db
 
@@ -20,11 +23,20 @@
   * `nvm install 8`
   * `nvm use 8` version installed
 * Copy config files
-  * `cp config.template.json config.json`
-  * `cp mainconfig.template.js mainconfig.js`
-* Copy template from templates/ to input/ and fill in new assignments. Scraper may autogenerate this when done. E.g. `cp template/assignments_template.csv input/assignments_template.csv` Type in new assignemnt
-* Backup from istudiez a new db file to `input/` folder and change file name in `config/mainconfig.js` **inputFile** to match input.
-* Run project `node index.js` or `npm start`
+  * `cp config/config.template.json config/config.json`
+  * `cp config/mainconfig.template.js config/mainconfig.js`
+  * `cp config/creds.template.js config/creds.js`
+* Copy template from templates/ to input/ and fill in new assignments. Scraper may autogenerate this when done. E.g. `cp templates/assignments_template.csv input/assignments_template.csv` Type in new assignemnt
+* Settings
+    * Backup from istudiez a new db file to `input/` folder and change file name in `config/mainconfig.js` **inputFile** to match input.
+    * Setup proper inputs in the new config files under `config`
+
+## Run Project
+
+* Scraper
+    * `node scraper.js`
+* Migrate Scraped data to istudiez backup
+    * Run project `node index.js` or `npm start`
 
 ## Issues
 
