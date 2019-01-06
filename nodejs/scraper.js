@@ -15,7 +15,7 @@ function end() {
   // get seconds 
   var seconds = Math.round(timeDiff);
   // console.log(seconds + " seconds");
-  return "-" + seconds + " seconds";
+  return "- in " + seconds + " seconds";
 }
 
 async function run() {
@@ -58,6 +58,7 @@ async function run() {
   // await page.waitFor(initialNavigation.NO_BTN);
   // await page.click(initialNavigation.NO_BTN);
   await page.waitForNavigation();
+  await page.waitFor(2000);
 
   await page.goto(MAINCONFIG.urlList.courses);
   await page.waitForNavigation();
@@ -131,8 +132,10 @@ async function run() {
 
     // if (i == 0)
     // if course name in skipCourses list then skip
-    if (MAINCONFIG.courseList.skipCourses.indexOf(course.name) != -1)
+    if (MAINCONFIG.courseList.skipCourses.indexOf(course.name) != -1) {
+      console.log("skipping course:" + course.name)
       continue;
+    }
     if (MAINCONFIG.course.contentSelector) {
       console.log("clicking course btn")
 
@@ -169,7 +172,7 @@ async function run() {
       // make this an external async function
       var assignmentList = await getAssignments(page);
 
-      console.log("assignment list:" + end())
+      console.log("assignment list:" + assignmentList.length + " " + end())
       // console.log(assignmentList)
       courseList[i] = assignmentList
       fullassignmentList = fullassignmentList.concat(assignmentList);
@@ -190,7 +193,7 @@ async function run() {
   var fs = require('fs');
 
 
-  console.log("finished course traversal" + end())
+  console.log("finished course transversal" + end())
   stringify(fullassignmentList, { header: true, columns: assignmentHeader }, (err, output) => {
     if (err) throw err;
     fs.writeFile('./input/assignments_scraped.csv', output, (err) => {
@@ -230,12 +233,12 @@ async function getAssignments(page) {
         priority: 2
       }
     ]
-    var defaultPriority = 2;
-    var removeWords = ["I'm Done"]
-    var cutOff = "Due"
+    var defaultPriority = courseConfig.defaultPriority; //2;
+    var removeWords = courseConfig.removeWords; //["I'm Done"]
+    var cutOff = courseConfig.cutOff; //"Due"
     var currentDate = new Date;
     var lastDate;
-    var firstDate = new Date(1970, 01, 12);
+    var firstDate = new Date(1970, 0, 2); // 1/1/70 is the starting date, offset by one to get correct date, e.g. 1/2/70
     var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
 
 
@@ -281,9 +284,27 @@ async function getAssignments(page) {
       var notification;
       var monthNames = ["January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"];
-      if (fulltext.indexOf(cutOff) != -1) {
-        finalTxt = fulltext.substr(0, fulltext.indexOf(cutOff))
-        notes += fulltext.substr(fulltext.indexOf(cutOff), fulltext.length)
+
+      var monthNamesAbbrev = ["Jan", "Feb", "Mar", "Apr", "May", "June",
+        "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+
+      var _cutOff = -1;
+      var _notification_word = -1;
+      for (let p = 0; p < cutOff.length; p++) {
+        const keyword = cutOff[p].word;
+        if (fulltext.indexOf(keyword) != -1) {
+
+          _cutOff = cutOff[p].word
+          _notification_word = cutOff[p].notification_word
+          break;
+        }
+      }
+
+      // :TODO
+      if (_cutOff != -1 && fulltext.indexOf(_cutOff) != -1) {
+        notes = "" // make sure to reset here, makes testing easier
+        finalTxt = fulltext.substr(0, fulltext.indexOf(_cutOff))
+        notes += fulltext.substr(fulltext.indexOf(_cutOff), fulltext.length)
 
         // retrieve date
         var monthIndex = -1;
@@ -300,6 +321,20 @@ async function getAssignments(page) {
           }
 
         }
+
+        // may use more than one spelling for months
+        if (monthIndex == -1) {
+          for (let j = 0; j < monthNamesAbbrev.length; j++) {
+            const element = monthNamesAbbrev[j];
+            monthIndex = notes.indexOf(element)
+            if (monthIndex != -1) {
+              monthNum = monthNamesAbbrev.indexOf(element)
+              monthName = element;
+              break
+            }
+
+          }
+        }
         // console.log(monthIndex)
         // console.log(monthNum)
 
@@ -308,7 +343,7 @@ async function getAssignments(page) {
         var monthDay = -1;
         var hours = 0;
         var minutes = 0;
-        if (monthIndex != -1 && notes.indexOf("at") != -1) {
+        if (monthIndex != -1 && notes.indexOf(_notification_word) != -1) {
           // console.log(fulltext)
           // console.log(monthName.length + monthIndex)
           // console.log(fulltext.indexOf(monthName))
@@ -316,11 +351,13 @@ async function getAssignments(page) {
           // console.log(monthIndex)
           // console.log(fulltext.indexOf("at"))
           // console.log(fulltext.indexOf("at") - (monthName.length + monthIndex))
-          monthDay = notes.substr(monthName.length + monthIndex, notes.indexOf("at") - (monthName.length + monthIndex));
+          // Due January 19 at 11:00 PM
+          // Ends Jan 19, 2019 11:00 PM
+          monthDay = notes.substr(monthName.length + monthIndex, notes.indexOf(_notification_word) - (monthName.length + monthIndex));
           // console.log(parseInt(atIndex))
 
           // retrieve time
-          var hourIndex = notes.indexOf("at") + "at".length
+          var hourIndex = notes.indexOf(_notification_word) + _notification_word.length
           var minutIndex = notes.indexOf(":") + ":".length
 
           var prefixIndex = notes.indexOf("PM")
@@ -388,7 +425,7 @@ async function getAssignments(page) {
         // if (k == 25)
         //   break;
       } else {
-        // may be a reading a ssignment set priorty to 1
+        // may be a reading a ssignment set priorty to 1 if no due date provided
         priority = 1;
 
       }
@@ -400,7 +437,7 @@ async function getAssignments(page) {
       assignment.push(courseConfig.courseName)
       assignment.push(notification_time)
       assignment.push(finalTxt)
-      console.log(assignment)
+      console.log(assignment) // prints in browser window
       assignList.push(assignment)
     } // end assignments 4 loop
     return assignList;
