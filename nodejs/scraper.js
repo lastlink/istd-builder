@@ -236,16 +236,7 @@ async function getAssignments(page) {
     //   continue
 
 
-    var priorities = [
-      {
-        keywords: ['exam', "report", "project"],
-        priority: 3
-      },
-      {
-        keywords: ['quiz', "due"],
-        priority: 2
-      }
-    ]
+    var priorities = courseConfig.priorities
     var defaultPriority = courseConfig.defaultPriority; //2;
     var removeWords = courseConfig.removeWords; //["I'm Done"]
     var cutOff = courseConfig.cutOff; //"Due"
@@ -426,7 +417,7 @@ async function getAssignments(page) {
         //   break;
       } else {
         // may be a reading a ssignment set priorty to 1 if no due date provided
-        priority = 1;
+        priority = 0;
 
       }
       // console.log("prioty" + priority)

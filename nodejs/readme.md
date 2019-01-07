@@ -26,9 +26,12 @@
   * `cp config/config.template.json config/config.json`
   * `cp config/mainconfig.template.js config/mainconfig.js`
   * `cp config/creds.template.js config/creds.js`
+* init istd folder
+    * `mkdir -p istd`
 * Copy template from templates/ to input/ and fill in new assignments. Scraper may autogenerate this when done. E.g. `cp templates/assignments_template.csv input/assignments_template.csv` Type in new assignemnt
 * Settings
     * Backup from istudiez a new db file to the `input/` folder and change file name in `config/mainconfig.js` **inputFile** to match input.
+        * create any new courses first before running a backup
         * In istudiez click on `Data > Create Data Backup`
     * Setup proper inputs in the new config files under `config`
 
@@ -36,8 +39,16 @@
 
 * Scraper
     * `node scraper.js`
-* Migrate Scraped data to istudiez backup
-    * Run project `node index.js` or `npm start`
+* Migrate Scraped data to istudiez backup, having issues with **bulk import** and sqlite lite database locks
+    * fix csv file before importing
+        * rename columns to `priority	due_date	notes	course_uid	notification_time	name	is_new	is_local	notify` paste special as text
+        * make `is_new` and `is_local` set to 1, `notify` set to 1 if there is a value in `notification_time`
+        * replace coursenames with course_uid in sqlite db. If they don't exist create them.
+    * use a program such as [sqlitebrowser], open `main.db` then import csv into temp table such as `assignments_tmp` then run
+        ```sql
+        INSERT INTO assignments(priority,	due_date,	notes,	course_uid,	notification_time,	name,	is_new,	is_local,	notify) SELECT * FROM assignments_tmp;
+        ```
+    * Issues with database locks - Run project `node index.js` or `npm start`
 
 ## Issues
 
