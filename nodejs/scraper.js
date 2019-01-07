@@ -277,7 +277,7 @@ async function getAssignments(page) {
       for (let p = 0; p < priorities.length; p++) {
         for (let k = 0; k < priorities[p].keywords.length; k++) {
           const keyword = priorities[p].keywords[k];
-          if (fulltext.indexOf(keyword) != -1) {
+          if (fulltext.toLowerCase().indexOf(keyword.toLowerCase()) != -1) {
             priorityObj = priorities[p];
             priority = priorities[p].priority
             break;
