@@ -40,14 +40,14 @@ module.exports = {
 		priorities: [
 			{
 				keywords: ['exam', "report", "project"],
-				priority: 3
+				priority: 2
 			},
 			{
 				keywords: ['quiz', "due"],
-				priority: 2
+				priority: 1
 			}
 		],
-		defaultPriority: 2
+		defaultPriority: 1 // 2 is highest priority 0 is lowest
 	},
 	headless: false,
 	closeBrowser: false

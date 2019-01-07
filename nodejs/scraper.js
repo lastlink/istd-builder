@@ -236,16 +236,7 @@ async function getAssignments(page) {
     //   continue
 
 
-    var priorities = [
-      {
-        keywords: ['exam', "report", "project"],
-        priority: 3
-      },
-      {
-        keywords: ['quiz', "due"],
-        priority: 2
-      }
-    ]
+    var priorities = courseConfig.priorities
     var defaultPriority = courseConfig.defaultPriority; //2;
     var removeWords = courseConfig.removeWords; //["I'm Done"]
     var cutOff = courseConfig.cutOff; //"Due"
@@ -426,7 +417,7 @@ async function getAssignments(page) {
         //   break;
       } else {
         // may be a reading a ssignment set priorty to 1 if no due date provided
-        priority = 1;
+        priority = 0;
 
       }
       // console.log("prioty" + priority)
@@ -442,6 +433,7 @@ async function getAssignments(page) {
       if (courseConfig.assignmentDetailSelector && courseConfig.assignmentDetailSelector.name) {
         var subAssignList = element.querySelectorAll(courseConfig.assignmentDetailSelector.name);
         for (let s = 0; s < subAssignList.length; s++) {
+          // console.log(subAssignList[s].innerText.trim())
           assignment[5] = subAssignList[s].innerText.trim()
           // add href if not first sub assignment
           if (courseConfig.assignmentDetailSelector.href) {
@@ -449,12 +441,12 @@ async function getAssignments(page) {
             assignment[2] = assignment[2].trim()
           }
           assignment[2] = assignment[2].replace(assignment[5], "") // take out assignment name if there
-          console.log(assignment) // prints in browser window
-          assignList.push(assignment)
+          console.log(JSON.parse(JSON.stringify(assignment))) // prints in browser window
+          assignList.push(JSON.parse(JSON.stringify(assignment)))
         }
       } else {
-        console.log(assignment) // prints in browser window
-        assignList.push(assignment)
+        console.log(JSON.parse(JSON.stringify(assignment))) // prints in browser window
+        assignList.push(JSON.parse(JSON.stringify(assignment)))
       }
     } // end assignments 4 loop
     return assignList;

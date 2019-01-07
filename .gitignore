@@ -11,3 +11,4 @@ node_modules
 nodejs/config/config.json
 nodejs/config/mainconfig.js
 creds.js
+nodejs/default.log
