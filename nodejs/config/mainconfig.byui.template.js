@@ -34,6 +34,7 @@ module.exports = {
 		tobSelector: "#TreeItemTOC",
 		tobCSelector: "div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem",
 		assignmentSelector: "div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem",
+		assignmentDetailSelector: { href: "div > div > div > div > a" }, // can be multi
 		selectors: [],
 		meridiem: ["PM", "AM"],
 		removeWords: ["I'm Done"],
