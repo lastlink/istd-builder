@@ -53,16 +53,26 @@ async function run() {
   await page.keyboard.type(CREDS.password);
 
   await page.waitFor(2000);
+
   await page.click(initialNavigation.BUTTON_SELECTOR);
   // some websites have a save computer button after signin
   // await page.waitFor(initialNavigation.NO_BTN);
   // await page.click(initialNavigation.NO_BTN);
-  await page.waitForNavigation();
+
   await page.waitFor(2000);
+  try {
+    await page.waitForNavigation();
+  } catch (error) {
+    console.log("waitForNavigation failed:" + initialNavigation.BUTTON_SELECTOR);
+  }
 
   await page.goto(MAINCONFIG.urlList.courses);
-  await page.waitForNavigation();
 
+  try {
+    await page.waitForNavigation();
+  } catch (error) {
+    console.log("waitForNavigation failed:" + MAINCONFIG.urlList.courses);
+  }
   await page.waitFor(2 * 1000);
   console.log("finished logging in" + end())
   // get courses list urls
@@ -76,7 +86,7 @@ async function run() {
   await page.waitFor(MAINCONFIG.courseList.coursesSelector);
   var courseList = await page.evaluate((courseListConfig) => {
     var tmpList = [];
-    const courses = Array.from(document.querySelectorAll(courseListConfig.coursesSelector));
+    var courses = Array.from(document.querySelectorAll(courseListConfig.coursesSelector));
 
     for (let i = 0; i < courses.length; i++) {
       const row = courses[i];
@@ -88,12 +98,13 @@ async function run() {
           assignments: []
         }
 
-        var cText = row.querySelector(courseListConfig.courseNameSelector).innerText;
+        var cText = row.querySelector(courseListConfig.courseNameSelector).innerText.trim();
         course.name = cText;
         var href = ""
         if (courseListConfig.courseHrefFunction) {
           href = eval('row' + courseListConfig.courseHrefFunction);
-          href = href.substr(courseListConfig.hrefStartString.length, href.indexOf(courseListConfig.hrefEndString) - courseListConfig.hrefStartString.length)
+          if (courseListConfig.hrefStartString && courseListConfig.hrefEndString)
+            href = href.substr(courseListConfig.hrefStartString.length, href.indexOf(courseListConfig.hrefEndString) - courseListConfig.hrefStartString.length)
 
         }
         course.href = href;
@@ -124,7 +135,6 @@ async function run() {
 
     console.log("navigating to:" + course.name)
     console.log("navigating to:" + course.href)
-
     await page.goto(course.href);
     // await page.waitForNavigation();
 
@@ -136,6 +146,8 @@ async function run() {
       console.log("skipping course:" + course.name)
       continue;
     }
+    // continue;
+
     if (MAINCONFIG.course.contentSelector) {
       console.log("clicking course btn")
 
@@ -159,7 +171,7 @@ async function run() {
 
     // div.d2l-datalist-container.d2l-datalist-style1 > ul> li > 
     // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
-    if (MAINCONFIG.course.tobCSelector) {
+    if (MAINCONFIG.course.tobSelector) {
       MAINCONFIG.course.courseName = course.name
       // generate assignments list
       try {
@@ -188,6 +200,7 @@ async function run() {
     // await page.waitForNavigation();
 
   } // end courselist for loop
+
   // console.log(courseList)
   var stringify = require('csv-stringify');
   var fs = require('fs');
@@ -264,8 +277,8 @@ async function getAssignments(page) {
       for (let p = 0; p < priorities.length; p++) {
         for (let k = 0; k < priorities[p].keywords.length; k++) {
           const keyword = priorities[p].keywords[k];
-          if (fulltext.indexOf(keyword) != -1) {
-
+          if (fulltext.toLowerCase().indexOf(keyword.toLowerCase()) != -1) {
+            priorityObj = priorities[p];
             priority = priorities[p].priority
             break;
           }
@@ -290,21 +303,24 @@ async function getAssignments(page) {
 
       var _cutOff = -1;
       var _notification_word = -1;
+      var _monthDay_word = -1
       for (let p = 0; p < cutOff.length; p++) {
         const keyword = cutOff[p].word;
         if (fulltext.indexOf(keyword) != -1) {
 
           _cutOff = cutOff[p].word
+          _monthDay_word = cutOff[p].monthDay_word ? cutOff[p].monthDay_word : cutOff[p].notification_word
           _notification_word = cutOff[p].notification_word
           break;
         }
       }
+      // monthDay_word
 
-      // :TODO
       if (_cutOff != -1 && fulltext.indexOf(_cutOff) != -1) {
         notes = "" // make sure to reset here, makes testing easier
         finalTxt = fulltext.substr(0, fulltext.indexOf(_cutOff))
         notes += fulltext.substr(fulltext.indexOf(_cutOff), fulltext.length)
+        notes.replace(finalTxt, "")
 
         // retrieve date
         var monthIndex = -1;
@@ -353,42 +369,33 @@ async function getAssignments(page) {
           // console.log(fulltext.indexOf("at") - (monthName.length + monthIndex))
           // Due January 19 at 11:00 PM
           // Ends Jan 19, 2019 11:00 PM
-          monthDay = notes.substr(monthName.length + monthIndex, notes.indexOf(_notification_word) - (monthName.length + monthIndex));
+          monthDay = notes.substr(monthName.length + monthIndex, notes.indexOf(_monthDay_word) - (monthName.length + monthIndex));
           // console.log(parseInt(atIndex))
-
           // retrieve time
           var hourIndex = notes.indexOf(_notification_word) + _notification_word.length
-          var minutIndex = notes.indexOf(":") + ":".length
+          var notificationDateString = notes.substr(hourIndex)
+          var minutIndex = notificationDateString.indexOf(":") + ":".length
 
-          var prefixIndex = notes.indexOf("PM")
+          var prefixIndex = notificationDateString.indexOf(courseConfig.meridiem[0])
           var hourOffset = 0;
           if (prefixIndex != -1) {
             hourOffset = 12
           } else
-            prefixIndex = notes.indexOf("AM")
-
+            prefixIndex = notes.indexOf(courseConfig.meridiem[1])
           // console.log(hourIndex + ":" + minutIndex + ":" + prefixIndex)
-
-
-          if (hourIndex != -1 & minutIndex != -1 & prefixIndex != -1) {
+          if (hourIndex != -1 && minutIndex != -1 && prefixIndex != -1) {
             // console.log( minutIndex - (fulltext.length - minutIndex))
-            hours = notes.substr(hourIndex, minutIndex - hourIndex - 1)
+            hours = notificationDateString.substr(0, minutIndex)
+            // hours = notes.substr(hourIndex, minutIndex - hourIndex - 1)
             hours = isNaN(parseInt(hours)) ? 0 : parseInt(hours) + hourOffset
             // console.log("hr:" + hours)
-            minutes = notes.substr(minutIndex, prefixIndex - minutIndex - 1)
+            minutes = notificationDateString.substr(minutIndex, prefixIndex - minutIndex)
             minutes = isNaN(parseInt(minutes)) ? 0 : parseInt(minutes)
-
             // console.log( prefixIndex - (fulltext.length - prefixIndex))
-
             // console.log("minutes:" + minutes)
           }
-
-
-
         }
         // console.log("monthday:" + monthDay)
-
-
         // if(monthIndex!=-1)
         // monthIndex++;
         var secondDate = new Date();
@@ -396,30 +403,23 @@ async function getAssignments(page) {
           secondDate = new Date(courseConfig.defaultYear || currentDate.getFullYear(), monthNum, monthDay, hours, minutes);
         }
         // var date  = new Date(2018,11,3,05,30)
-
-
         // console.log(secondDate)
-
         diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / (oneDay)));
         // var d = new Date(year, month, day, hours, minutes, seconds, milliseconds);
-
         // console.log(diffDays)
         if (hours != 0 || minutes != 0)
           notification_time = secondDate.getHours() * 60 * 60 + secondDate.getMinutes() * 60
         // console.log(notification_time)
-        // console.log("
-        // days":)
-
-
         // var finalTxt = fulltext.indexOf(cutOff) == -1 ? fulltext : fulltext.substr(0, fulltext.indexOf(cutOff))
         // console.log("finalTxt:" + finalTxt)
-
-        try {
-          var href = element.querySelector("div > div > div > div > a").href
-          console.log(href)
-          notes += "\n" + href
-        } catch (error) {
-          // console.log(error)
+        if (courseConfig.assignmentDetailSelector && !courseConfig.assignmentDetailSelector.name && courseConfig.assignmentDetailSelector.href) {
+          try {
+            var href = element.querySelector(courseConfig.assignmentDetailSelector.href).href
+            console.log(href)
+            notes += "\n" + href
+          } catch (error) {
+            // console.log(error)
+          }
         }
         // console.log("Notes:" + notes)
         // if (k == 25)
@@ -430,15 +430,32 @@ async function getAssignments(page) {
 
       }
       // console.log("prioty" + priority)
-      assignment.push(priority);
-      assignment.push(diffDays);
-      assignment.push(notes)
+      assignment.push(priority); //0
+      assignment.push(diffDays); //1
+      assignment.push(notes.trim()) // 2
+      assignment.push(courseConfig.courseName) // 3
+      assignment.push(notification_time) // 4
+      assignment.push(finalTxt.trim()) // 5 // name
 
-      assignment.push(courseConfig.courseName)
-      assignment.push(notification_time)
-      assignment.push(finalTxt)
-      console.log(assignment) // prints in browser window
-      assignList.push(assignment)
+
+      // if name selector available change and push
+      if (courseConfig.assignmentDetailSelector && courseConfig.assignmentDetailSelector.name) {
+        var subAssignList = element.querySelectorAll(courseConfig.assignmentDetailSelector.name);
+        for (let s = 0; s < subAssignList.length; s++) {
+          assignment[5] = subAssignList[s].innerText.trim()
+          // add href if not first sub assignment
+          if (courseConfig.assignmentDetailSelector.href) {
+            assignment[2] = notes.trim() + "\n" + element.querySelectorAll(courseConfig.assignmentDetailSelector.href)[s].href;
+            assignment[2] = assignment[2].trim()
+          }
+          assignment[2] = assignment[2].replace(assignment[5], "") // take out assignment name if there
+          console.log(assignment) // prints in browser window
+          assignList.push(assignment)
+        }
+      } else {
+        console.log(assignment) // prints in browser window
+        assignList.push(assignment)
+      }
     } // end assignments 4 loop
     return assignList;
   }, MAINCONFIG.course);
