@@ -171,7 +171,7 @@ async function run() {
 
     // div.d2l-datalist-container.d2l-datalist-style1 > ul> li > 
     // div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem
-    if (MAINCONFIG.course.tobCSelector) {
+    if (MAINCONFIG.course.tobSelector) {
       MAINCONFIG.course.courseName = course.name
       // generate assignments list
       try {
@@ -320,6 +320,7 @@ async function getAssignments(page) {
         notes = "" // make sure to reset here, makes testing easier
         finalTxt = fulltext.substr(0, fulltext.indexOf(_cutOff))
         notes += fulltext.substr(fulltext.indexOf(_cutOff), fulltext.length)
+        notes.replace(finalTxt, "")
 
         // retrieve date
         var monthIndex = -1;
@@ -372,21 +373,23 @@ async function getAssignments(page) {
           // console.log(parseInt(atIndex))
           // retrieve time
           var hourIndex = notes.indexOf(_notification_word) + _notification_word.length
-          var minutIndex = notes.indexOf(":") + ":".length
+          var notificationDateString = notes.substr(hourIndex)
+          var minutIndex = notificationDateString.indexOf(":") + ":".length
 
-          var prefixIndex = notes.indexOf(courseConfig.meridiem[0])
+          var prefixIndex = notificationDateString.indexOf(courseConfig.meridiem[0])
           var hourOffset = 0;
           if (prefixIndex != -1) {
             hourOffset = 12
           } else
             prefixIndex = notes.indexOf(courseConfig.meridiem[1])
           // console.log(hourIndex + ":" + minutIndex + ":" + prefixIndex)
-          if (hourIndex != -1 & minutIndex != -1 & prefixIndex != -1) {
+          if (hourIndex != -1 && minutIndex != -1 && prefixIndex != -1) {
             // console.log( minutIndex - (fulltext.length - minutIndex))
-            hours = notes.substr(hourIndex, minutIndex - hourIndex - 1)
+            hours = notificationDateString.substr(0, minutIndex)
+            // hours = notes.substr(hourIndex, minutIndex - hourIndex - 1)
             hours = isNaN(parseInt(hours)) ? 0 : parseInt(hours) + hourOffset
             // console.log("hr:" + hours)
-            minutes = notes.substr(minutIndex, prefixIndex - minutIndex - 1)
+            minutes = notificationDateString.substr(minutIndex, prefixIndex - minutIndex)
             minutes = isNaN(parseInt(minutes)) ? 0 : parseInt(minutes)
             // console.log( prefixIndex - (fulltext.length - prefixIndex))
             // console.log("minutes:" + minutes)
@@ -409,7 +412,7 @@ async function getAssignments(page) {
         // console.log(notification_time)
         // var finalTxt = fulltext.indexOf(cutOff) == -1 ? fulltext : fulltext.substr(0, fulltext.indexOf(cutOff))
         // console.log("finalTxt:" + finalTxt)
-        if (courseConfig.assignmentDetailSelector.href) {
+        if (courseConfig.assignmentDetailSelector && !courseConfig.assignmentDetailSelector.name && courseConfig.assignmentDetailSelector.href) {
           try {
             var href = element.querySelector(courseConfig.assignmentDetailSelector.href).href
             console.log(href)
@@ -429,21 +432,23 @@ async function getAssignments(page) {
       // console.log("prioty" + priority)
       assignment.push(priority); //0
       assignment.push(diffDays); //1
-      assignment.push(notes) // 2
+      assignment.push(notes.trim()) // 2
       assignment.push(courseConfig.courseName) // 3
       assignment.push(notification_time) // 4
-      assignment.push(finalTxt) // 5 // name
+      assignment.push(finalTxt.trim()) // 5 // name
 
 
       // if name selector available change and push
       if (courseConfig.assignmentDetailSelector && courseConfig.assignmentDetailSelector.name) {
         var subAssignList = element.querySelectorAll(courseConfig.assignmentDetailSelector.name);
-        for (let s = 0; s < assign.length; s++) {
-          assignment[5] = subAssignList[s].innerText
+        for (let s = 0; s < subAssignList.length; s++) {
+          assignment[5] = subAssignList[s].innerText.trim()
           // add href if not first sub assignment
-          if (courseConfig.assignmentDetailSelector.href && s != 0) {
-            assignment[2] += "\n" + element.querySelectorAll(courseConfig.assignmentDetailSelector.href)[s].href;
+          if (courseConfig.assignmentDetailSelector.href) {
+            assignment[2] = notes.trim() + "\n" + element.querySelectorAll(courseConfig.assignmentDetailSelector.href)[s].href;
+            assignment[2] = assignment[2].trim()
           }
+          assignment[2] = assignment[2].replace(assignment[5], "") // take out assignment name if there
           console.log(assignment) // prints in browser window
           assignList.push(assignment)
         }

@@ -30,12 +30,11 @@ module.exports = {
 	},
 	course: {
 		defaultYear: 2019,
-		contentSelector: "div.d2l-navigation-s-main-wrapper > div:nth-child(1) > a",
-		// tobSelector: "#TreeItemTOC",
-		tobCSelector: `a[title="Syllabus"]`,
-		assignmentSelector: "div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem",
+		// contentSelector: "div.d2l-navigation-s-main-wrapper > div:nth-child(1) > a",
+		tobSelector: `a[title="Syllabus"]`,
+		assignmentSelector: "tr.date",
 		assignmentDetailSelector: { name: "td.name", href: "td.name > a" }, // can be multi
-		meridiem: ["pm","am"],
+		meridiem: ["pm", "am"],
 		selectors: [],
 		removeWords: ["I'm Done"],
 		cutOff: [{ word: "", monthDay_word: ", 2019", notification_word: "due by" }],
