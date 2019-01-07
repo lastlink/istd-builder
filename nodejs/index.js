@@ -95,6 +95,8 @@ fs.copy('./input/' + MAINCONFIG.istdSettings.inputFile + '.istd', './tmp/tmp.zip
 								// Transaction has been rolled back
 								// err is whatever rejected the promise chain returned to the transaction callback
 							});
+							setTimeout(function2, 500);
+
 
 						}
 						catch (err) {

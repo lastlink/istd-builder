@@ -442,6 +442,7 @@ async function getAssignments(page) {
       if (courseConfig.assignmentDetailSelector && courseConfig.assignmentDetailSelector.name) {
         var subAssignList = element.querySelectorAll(courseConfig.assignmentDetailSelector.name);
         for (let s = 0; s < subAssignList.length; s++) {
+          // console.log(subAssignList[s].innerText.trim())
           assignment[5] = subAssignList[s].innerText.trim()
           // add href if not first sub assignment
           if (courseConfig.assignmentDetailSelector.href) {
@@ -449,12 +450,12 @@ async function getAssignments(page) {
             assignment[2] = assignment[2].trim()
           }
           assignment[2] = assignment[2].replace(assignment[5], "") // take out assignment name if there
-          console.log(assignment) // prints in browser window
-          assignList.push(assignment)
+          console.log(JSON.parse(JSON.stringify(assignment))) // prints in browser window
+          assignList.push(JSON.parse(JSON.stringify(assignment)))
         }
       } else {
-        console.log(assignment) // prints in browser window
-        assignList.push(assignment)
+        console.log(JSON.parse(JSON.stringify(assignment))) // prints in browser window
+        assignList.push(JSON.parse(JSON.stringify(assignment)))
       }
     } // end assignments 4 loop
     return assignList;
