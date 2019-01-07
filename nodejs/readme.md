@@ -47,6 +47,7 @@
     * use a program such as [sqlitebrowser], open `main.db` then import csv into temp table such as `assignments_tmp` then run
         ```sql
         INSERT INTO assignments(priority,	due_date,	notes,	course_uid,	notification_time,	name,	is_new,	is_local,	notify) SELECT * FROM assignments_tmp;
+        drop table assignments_tmp; /*if doing multiple imports*/
         ```
     * Issues with database locks - Run project `node index.js` or `npm start`
 

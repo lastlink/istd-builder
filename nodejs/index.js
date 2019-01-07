@@ -64,7 +64,8 @@ fs.copy('./input/' + MAINCONFIG.istdSettings.inputFile + '.istd', './tmp/tmp.zip
 								notes: data.notes,
 								due_date: data.due_date || MAINCONFIG.istdSettings.defaultDueDate,
 								course_uid: data.course_name || MAINCONFIG.istdSettings.def_course_uid,
-								name: data.name
+								name: data.name,
+								priority: data.priority
 							}
 							// if notify time provided them fill it out and set notify to true (1)
 							if (data.notify) {
@@ -72,31 +73,35 @@ fs.copy('./input/' + MAINCONFIG.istdSettings.inputFile + '.istd', './tmp/tmp.zip
 								assignmentObj.notify = 1
 							}
 							console.log(JSON.stringify(assignmentObj))
-							//perform the operation
-							db.sequelize.transaction(function (t) {
-								// search for course by name, if it doesn't exist then creat it.
+							//perform the operation, TODO bulk insert, getting database locked on more than 5 records
+							setTimeout(function () {
+								console.log('protection against db lockups');
 
-								return db.assignments.create(assignmentObj, { transaction: t }).then(function (newRow) {
-									// return newRow.setShooter({
-									//   firstName: 'John',
-									//   lastName: 'Boothe'
-									// }, {transaction: t});
+								db.sequelize.transaction(function (t) {
+									// search for course by name, if it doesn't exist then creat it.
+
+									return db.assignments.create(assignmentObj, { transaction: t }).then(function (newRow) {
+										// return newRow.setShooter({
+										//   firstName: 'John',
+										//   lastName: 'Boothe'
+										// }, {transaction: t});
+									});
+								}).then(function (result) {
+									console.log("Commit successful:")
+									console.log(result)
+									// Transaction has been committed
+									// result is whatever the result of the promise chain returned to the transaction callback
+								}).catch(function (err) {
+									console.log("Transaction error rolling back:")
+									console.log(err)
+									log(err);
+
+									// Transaction has been rolled back
+									// err is whatever rejected the promise chain returned to the transaction callback
 								});
-							}).then(function (result) {
-								console.log("Commit successful:")
-								console.log(result)
-								// Transaction has been committed
-								// result is whatever the result of the promise chain returned to the transaction callback
-							}).catch(function (err) {
-								console.log("Transaction error rolling back:")
-								console.log(err)
-								log(err);
+								// protection against db lockups
 
-								// Transaction has been rolled back
-								// err is whatever rejected the promise chain returned to the transaction callback
-							});
-							setTimeout(function2, 500);
-
+							}, 1500);
 
 						}
 						catch (err) {
