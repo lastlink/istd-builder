@@ -28,7 +28,8 @@
   * `cp config/creds.template.js config/creds.js`
 * Copy template from templates/ to input/ and fill in new assignments. Scraper may autogenerate this when done. E.g. `cp templates/assignments_template.csv input/assignments_template.csv` Type in new assignemnt
 * Settings
-    * Backup from istudiez a new db file to `input/` folder and change file name in `config/mainconfig.js` **inputFile** to match input.
+    * Backup from istudiez a new db file to the `input/` folder and change file name in `config/mainconfig.js` **inputFile** to match input.
+        * In istudiez click on `Data > Create Data Backup`
     * Setup proper inputs in the new config files under `config`
 
 ## Run Project
