@@ -35,6 +35,7 @@ module.exports = {
 		tobCSelector: "div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem",
 		assignmentSelector: "div.d2l-collapsepane-content > div > div> div> div.d2l-datalist-container.d2l-datalist-style1 > ul.d2l-datalist.vui-list > li.d2l-datalist-item.d2l-datalist-simpleitem",
 		selectors: [],
+		meridiem: ["PM", "AM"],
 		removeWords: ["I'm Done"],
 		cutOff: [{ word: "Due", notification_word: "at" }, { word: "Ends", notification_word: ", 2019" }],
 		priorities: [
