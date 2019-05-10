@@ -19,12 +19,19 @@ function end() {
 }
 
 async function run() {
+  const chrome = { x: 0, y: 74 };   // comes from config in reality
+  const width = 1920
+  const height = 1024
   const browser = await puppeteer.launch({
     headless: MAINCONFIG.headless,
     args: ["--ash-host-window-bounds=1920x1080", "--window-size=1920,1048", "--window-position=0,0"]
   });
+  // `--window-size=${width+chrome.x},${height+chrome.y}`, 
+
 
   const page = await browser.newPage();
+  await page.setViewport({width, height, deviceScaleFactor: 2})
+
 
   // await page.screenshot({ path: 'screenshots/github.png' });
 
